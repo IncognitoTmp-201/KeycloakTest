@@ -1,41 +1,21 @@
-version: '3.8'
-
 services:
-  db:
-    container_name: db_mysql
-    image: mysql:latest
-    volumes:
-      - .docker/db/mysql:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_DB=keycloak
-      - MYSQL_ROOT_PASSWORD=root_pwd
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=pa55word
-    networks:
-      - keycloak_network
-
   keycloak:
+    image: quay.io/keycloak/keycloak:21.0.1
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:20.0.0
-    command: start-dev
     ports:
-      - "8080:8080"
+      - "8090:8080"
     environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KC_DB=mysql
-      - KC_DB_URL_DATABASE=keycloak
-      - KC_DB_USERNAME=root
-      - KC_DB_PASSWORD=root_pwd
-      - KC_DB_URL_HOST=db
-      - KC_DB_SCHEMA=keycloak
-    depends_on:
-      - db
-    networks:
-      - keycloak_network
-  
-networks:
-  keycloak_network:
-    driver: bridge
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_URL: http://${PUBLIC_IP_ADDRESS}:${NGINX_ACCESS_PORT}
+      KC_PROXY: edge
+      KC_LOG_LEVEL: debug
+      KC_HOSTNAME_ADMIN_URL: http://${PUBLIC_IP_ADDRESS}:${NGINX_ACCESS_PORT}
+    command: [ "start-dev"]
+  nginx:
+    image: nginx:1.19.0-alpine
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+    command: ["nginx-debug", '-g', 'daemon off;']
+    ports:
+      - ${NGINX_ACCESS_PORT}:80
