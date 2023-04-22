@@ -9,7 +9,7 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HOSTNAME_URL: http://${PUBLIC_IP_ADDRESS}:${NGINX_ACCESS_PORT}
       KC_PROXY: edge
-      KC_LOG_LEVEL: debug
+      #KC_LOG_LEVEL: debug
       KC_HOSTNAME_ADMIN_URL: http://${PUBLIC_IP_ADDRESS}:${NGINX_ACCESS_PORT}
     command: [ "start-dev"]
   nginx:
