@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: db_mysql
+    image: mysql:latest
+    volumes:
+      - .docker/db/mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DB=keycloak
+      - MYSQL_ROOT_PASSWORD=root_pwd
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=pa55word
+    networks:
+      - keycloak_network
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:20.0.0
+    command: start-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=mysql
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_USERNAME=root
+      - KC_DB_PASSWORD=root_pwd
+      - KC_DB_URL_HOST=db
+      - KC_DB_SCHEMA=keycloak
+    depends_on:
+      - db
+    networks:
+      - keycloak_network
+  
+networks:
+  keycloak_network:
+    driver: bridge
